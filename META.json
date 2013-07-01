@@ -1,0 +1,48 @@
+{
+   "abstract" : "Core code for timelog utility.",
+   "author" : [
+      "G. Wade Johnson <gwadej@cpan.org>"
+   ],
+   "dynamic_config" : 1,
+   "generated_by" : "ExtUtils::MakeMaker version 6.66, CPAN::Meta::Converter version 2.112621",
+   "license" : [
+      "unknown"
+   ],
+   "meta-spec" : {
+      "url" : "http://search.cpan.org/perldoc?CPAN::Meta::Spec",
+      "version" : "2"
+   },
+   "name" : "App-TimelogTxt",
+   "no_index" : {
+      "directory" : [
+         "t",
+         "inc"
+      ]
+   },
+   "prereqs" : {
+      "build" : {
+         "requires" : {
+            "ExtUtils::MakeMaker" : 0
+         }
+      },
+      "configure" : {
+         "requires" : {
+            "ExtUtils::MakeMaker" : 0
+         }
+      },
+      "runtime" : {
+         "requires" : {
+            "App::CmdDispatch" : "0.4",
+            "Config::Tiny" : 0,
+            "Getopt::Long" : 0,
+            "POSIX" : 0,
+            "Test::Most" : 0,
+            "Test::NoWarnings" : 0,
+            "Time::Local" : 0,
+            "autodie" : 0
+         }
+      }
+   },
+   "release_status" : "stable",
+   "version" : "0.03"
+}

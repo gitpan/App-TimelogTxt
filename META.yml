@@ -1,0 +1,29 @@
+---
+abstract: 'Core code for timelog utility.'
+author:
+  - 'G. Wade Johnson <gwadej@cpan.org>'
+build_requires:
+  ExtUtils::MakeMaker: 0
+configure_requires:
+  ExtUtils::MakeMaker: 0
+dynamic_config: 1
+generated_by: 'ExtUtils::MakeMaker version 6.66, CPAN::Meta::Converter version 2.112621'
+license: unknown
+meta-spec:
+  url: http://module-build.sourceforge.net/META-spec-v1.4.html
+  version: 1.4
+name: App-TimelogTxt
+no_index:
+  directory:
+    - t
+    - inc
+requires:
+  App::CmdDispatch: 0.4
+  Config::Tiny: 0
+  Getopt::Long: 0
+  POSIX: 0
+  Test::Most: 0
+  Test::NoWarnings: 0
+  Time::Local: 0
+  autodie: 0
+version: 0.03
