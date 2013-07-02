@@ -26,4 +26,4 @@ requires:
   Test::NoWarnings: 0
   Time::Local: 0
   autodie: 0
-version: 0.03_1
+version: 0.03_2
