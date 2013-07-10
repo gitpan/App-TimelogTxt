@@ -18,12 +18,14 @@ no_index:
     - t
     - inc
 requires:
-  App::CmdDispatch: 0.4
+  App::CmdDispatch: 0.41
   Config::Tiny: 0
+  Cwd: 0
+  File::Path: 0
   Getopt::Long: 0
   POSIX: 0
   Test::Most: 0
   Test::NoWarnings: 0
   Time::Local: 0
   autodie: 0
-version: 0.03_3
+version: 0.04
