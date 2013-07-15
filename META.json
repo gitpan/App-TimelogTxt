@@ -1,12 +1,12 @@
 {
-   "abstract" : "Core code for timelog utility.",
+   "abstract" : "Commandline tracking of time for tasks and projects.",
    "author" : [
       "G. Wade Johnson <gwadej@cpan.org>"
    ],
    "dynamic_config" : 1,
    "generated_by" : "ExtUtils::MakeMaker version 6.66, CPAN::Meta::Converter version 2.112621",
    "license" : [
-      "unknown"
+      "perl_5"
    ],
    "meta-spec" : {
       "url" : "http://search.cpan.org/perldoc?CPAN::Meta::Spec",
@@ -34,7 +34,6 @@
          "requires" : {
             "App::CmdDispatch" : "0.41",
             "Config::Tiny" : 0,
-            "Cwd" : 0,
             "File::Path" : 0,
             "Getopt::Long" : 0,
             "POSIX" : 0,
@@ -46,5 +45,10 @@
       }
    },
    "release_status" : "stable",
-   "version" : "0.04"
+   "resources" : {
+      "repository" : {
+         "url" : "https://github.com/gwadej/app-timelogtxt"
+      }
+   },
+   "version" : "0.05"
 }
