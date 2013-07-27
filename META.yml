@@ -29,4 +29,4 @@ requires:
   autodie: 0
 resources:
   repository: https://github.com/gwadej/app-timelogtxt
-version: 0.05
+version: 0.06

@@ -12,7 +12,7 @@ use App::TimelogTxt::Day;
 use App::TimelogTxt::File;
 use App::TimelogTxt::Event;
 
-our $VERSION = '0.05';
+our $VERSION = '0.06';
 
 # Initial configuration information.
 my %config = (
@@ -328,11 +328,15 @@ sub extract_day_tasks
     my $stamp = App::TimelogTxt::Utils::day_stamp( $day );
     die "No day provided.\n" unless defined $stamp;
     my $estamp = App::TimelogTxt::Utils::day_end( $eday ? App::TimelogTxt::Utils::day_stamp( $eday ) : $stamp );
+
+    # I need to start one day before to deal with the possibility that first
+    #   task was held over midnight.
+    my $pstamp = App::TimelogTxt::Utils::prev_stamp( $stamp );
     my ( $summary, $last, @summaries );
     my $prev_stamp = '';
 
     open my $fh, '<', $app->_logfile;
-    my $file = App::TimelogTxt::File->new( $fh, $stamp, $estamp );
+    my $file = App::TimelogTxt::File->new( $fh, $pstamp, $estamp );
 
     use Data::Dumper;
     while( defined( my $line = $file->readline ) )
@@ -363,10 +367,25 @@ sub extract_day_tasks
         $last = ($event->is_stop() ? undef : $event );
     }
 
+    # If the first summary is the day before we were supposed to report,
+    #   drop it.
+    shift @summaries if $summaries[0]->date_stamp() eq $pstamp;
+
     return [] unless $summary;
-    my $end_time = ( App::TimelogTxt::Utils::is_today( $day ) and !($last and $last->is_stop()) )
-        ? time
-        : App::TimelogTxt::Utils::stamp_to_localtime( $estamp );
+    my $end_time;
+    if( !$summary->is_complete() )
+    {
+        my $datestamp = $summary->date_stamp() || $day;
+        if( App::TimelogTxt::Utils::is_today( $datestamp ) )
+        {
+            $end_time = time;
+        }
+        else
+        {
+            $summary->close_day( $last );
+            $end_time = App::TimelogTxt::Utils::stamp_to_localtime( $datestamp );
+        }
+    }
 
     $summary->update_dur( $last, $end_time );
 
@@ -434,7 +453,7 @@ App::TimelogTxt - Commandline tracking of time for tasks and projects.
 
 =head1 VERSION
 
-This document describes App::TimelogTxt version 0.05
+This document describes App::TimelogTxt version 0.06
 
 =head1 SYNOPSIS
 
