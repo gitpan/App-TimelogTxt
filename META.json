@@ -36,6 +36,7 @@
             "Config::Tiny" : 0,
             "File::Path" : 0,
             "Getopt::Long" : 0,
+            "List::Util" : 0,
             "POSIX" : 0,
             "Test::Most" : 0,
             "Test::NoWarnings" : 0,
@@ -50,5 +51,5 @@
          "url" : "https://github.com/gwadej/app-timelogtxt"
       }
    },
-   "version" : "0.06"
+   "version" : "0.10"
 }

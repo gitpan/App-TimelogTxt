@@ -12,7 +12,7 @@ use App::TimelogTxt::Day;
 use App::TimelogTxt::File;
 use App::TimelogTxt::Event;
 
-our $VERSION = '0.06';
+our $VERSION = '0.10';
 
 # Initial configuration information.
 my %config = (
@@ -89,21 +89,22 @@ if argument supplied.',
     },
     'report' => {
         code     => \&daily_report,
-        clue     => 'report [date [end date]]',
+        clue     => 'report [date [end date]] [project regexes]',
         abstract => 'Task report.',
-        help     => 'Display a report for the specified days.',
+        help     => 'Display a report for the specified days and projects.',
     },
     'summary' => {
         code     => \&daily_summary,
-        clue     => 'summary [date [end date]]',
+        clue     => 'summary [date [end date]] [project regexes]',
         abstract => 'Short summary report.',
         help     => q{Display a summary of the appropriate days' projects.},
     },
     'hours' => {
         code     => \&report_hours,
-        clue     => 'hours [date [end date]]',
+        clue     => 'hours [date [end date]] [project regexes]',
         abstract => 'Hours report.',
-        help     => q{Display the hours worked for each of the appropriate days.},
+        help     => q{Display the hours worked for each of the appropriate days
+and projects.},
     },
 );
 
@@ -154,10 +155,12 @@ sub run
         default_commands => 'help shell',
         'help:post_hint' =>
             "\nwhere [date] is an optional string specifying a date of the form YYYY-MM-DD
-or a day name: yesterday, today, or sunday .. saturday.\n",
+or a day name: yesterday, today, or sunday .. saturday and [project regexes]
+is a list of strings of regular expressions matching project names.\n",
         'help:post_help' =>
             "\nwhere [date] is an optional string specifying a date of the form YYYY-MM-DD
-or a day name: yesterday, today, or sunday .. saturday.\n",
+or a day name: yesterday, today, or sunday .. saturday and [project regexes]
+is a list of strings of regular expressions matching project names.\n",
     };
     my $app = Timelog::CmdDispatch->new( \%commands, $options );
 
@@ -236,9 +239,9 @@ sub list_projects
 
 sub daily_report
 {
-    my ( $app, $day, $eday ) = @_;
+    my ( $app, @filters ) = @_;
 
-    my $summaries = extract_day_tasks( $app, $day, $eday );
+    my $summaries = extract_day_tasks( $app, @filters );
 
     foreach my $summary ( @{$summaries} )
     {
@@ -249,9 +252,9 @@ sub daily_report
 
 sub daily_summary
 {
-    my ( $app, $day, $eday ) = @_;
+    my ( $app, @filters ) = @_;
 
-    my $summaries = extract_day_tasks( $app, $day, $eday );
+    my $summaries = extract_day_tasks( $app, @filters );
 
     foreach my $summary ( @{$summaries} )
     {
@@ -262,9 +265,9 @@ sub daily_summary
 
 sub report_hours
 {
-    my ( $app, $day, $eday ) = @_;
+    my ( $app, @filters ) = @_;
 
-    my $summaries = extract_day_tasks( $app, $day, $eday );
+    my $summaries = extract_day_tasks( $app, @filters );
 
     foreach my $summary ( @{$summaries} )
     {
@@ -323,15 +326,9 @@ sub list_stack
 
 sub extract_day_tasks
 {
-    my ( $app, $day, $eday ) = @_;
+    my ( $app, @args ) = @_;
 
-    my $stamp = App::TimelogTxt::Utils::day_stamp( $day );
-    die "No day provided.\n" unless defined $stamp;
-    my $estamp = App::TimelogTxt::Utils::day_end( $eday ? App::TimelogTxt::Utils::day_stamp( $eday ) : $stamp );
-
-    # I need to start one day before to deal with the possibility that first
-    #   task was held over midnight.
-    my $pstamp = App::TimelogTxt::Utils::prev_stamp( $stamp );
+    my ($stamp, $estamp, $pstamp, @filters) = process_extraction_args( @args );
     my ( $summary, $last, @summaries );
     my $prev_stamp = '';
 
@@ -375,7 +372,7 @@ sub extract_day_tasks
     my $end_time;
     if( !$summary->is_complete() )
     {
-        my $datestamp = $summary->date_stamp() || $day;
+        my $datestamp = $summary->date_stamp() || $stamp;
         if( App::TimelogTxt::Utils::is_today( $datestamp ) )
         {
             $end_time = time;
@@ -391,7 +388,44 @@ sub extract_day_tasks
 
     return if $summary->is_empty;
 
-    return \@summaries;
+    return filter_summaries( \@filters, \@summaries );
+}
+
+sub filter_summaries
+{
+    my ( $filters, $summaries ) = @_;
+
+    return $summaries unless @{$filters};
+
+    my $filter = join( '|', map { "(?:$_)" } @{$filters} );
+    my $filter_re = qr/$filter/;
+    return [
+        grep { $_->has_tasks }
+        map { $_->day_filtered_by_project( $filter_re ) }
+        @{$summaries}
+    ];
+}
+
+sub process_extraction_args
+{
+    my ($day, @args) = @_;
+
+    # First argument is always the day
+    my $stamp = App::TimelogTxt::Utils::day_stamp( $day );
+    die "No day provided.\n" unless defined $stamp;
+    my $eday = shift @args;
+    my $estamp = App::TimelogTxt::Utils::day_end( $eday ? App::TimelogTxt::Utils::day_stamp( $eday ) : $stamp );
+    if( !defined $estamp )
+    {
+        $estamp = App::TimelogTxt::Utils::day_end( $stamp );
+        unshift @args, $eday if $eday;
+    }
+
+    # I need to start one day before to deal with the possibility that first
+    #   task was held over midnight.
+    my $pstamp = App::TimelogTxt::Utils::prev_stamp( $stamp );
+
+    return ($stamp, $estamp, $pstamp, @args);
 }
 
 # Utility functions
@@ -453,7 +487,7 @@ App::TimelogTxt - Commandline tracking of time for tasks and projects.
 
 =head1 VERSION
 
-This document describes App::TimelogTxt version 0.06
+This document describes App::TimelogTxt version 0.10
 
 =head1 SYNOPSIS
 
